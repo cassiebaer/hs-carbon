@@ -25,3 +25,9 @@ executable PiExample
   build-depends: base, random, mtl, tf-random, parallel
   main-is: Pi.hs
   ghc-options: -threaded
+
+executable IntegralExample
+  hs-source-dirs: src, examples
+  build-depends: base, random, mtl, tf-random, parallel
+  main-is: Integral.hs
+  ghc-options: -threaded
