@@ -2,7 +2,7 @@ module Control.Monad.MonteCarlo
   (
     MonteCarlo
   , experimentS
-  , experimentM
+  , experimentP
   , runMC
   , mcUniform
   , mcUniformR
@@ -10,18 +10,26 @@ module Control.Monad.MonteCarlo
 where
 
 import Control.Monad.State
+import Control.Parallel
 import Data.Monoid
 import System.Random
 
 -- | Skeleton for common usage
-experimentS :: RandomGen g => MonteCarlo g a -> Int -> g -> [a]
-experimentS m n g = runMC (replicateM n m) g
-
--- | Skeleton for common usage
-experimentM :: (RandomGen g, Monoid s)
+experimentS :: (RandomGen g, Monoid s)
             => MonteCarlo g a -> Int -> g -> (a -> s) -> s
-experimentM m n g f = let xs = runMC (replicateM n m) g
+experimentS m n g f = let xs = runMC (replicateM n m) g
                        in mconcat (map f xs)
+
+-- | Parallel
+experimentP :: (RandomGen g, Monoid s)
+            => MonteCarlo g a -> Int -> Int -> g -> (a -> s) -> s
+experimentP m n c g f
+    | n <= c    = experimentS m n g f
+    | otherwise = s `par` (ss `pseq` mappend s ss)
+  where
+    s  = experimentS m c g1 f
+    ss = experimentP m (n-c) c g2 f
+    (g1,g2) = split g
 
 -- | Monad representing a MonteCarlo simulation using
 --    RandomGen instance g and returning a value of type a
