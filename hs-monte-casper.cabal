@@ -17,5 +17,11 @@ cabal-version:       >=1.8
 library
   exposed-modules:     Control.Monad.MonteCarlo
   -- other-modules:       
-  build-depends:       base, mtl, random
+  build-depends:       base, mtl, random, parallel
   hs-source-dirs:      src
+
+executable PiExample
+  hs-source-dirs: src, examples
+  build-depends: base, random, mtl, tf-random, parallel
+  main-is: Pi.hs
+  ghc-options: -threaded
