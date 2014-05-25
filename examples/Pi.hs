@@ -5,12 +5,13 @@ import Control.Monad.MonteCarlo
 import Data.List (foldl')
 import Data.Monoid (Monoid(..))
 import System.Environment
+import System.Random
 import System.Random.TF
 
-mcSquareD :: MonteCarlo TFGen (Double,Double)
+mcSquareD :: RandomGen g => MonteCarlo g (Double,Double)
 mcSquareD = liftM2 (,) (mcUniformR (-1,1)) (mcUniformR (-1,1))
 
-inUnitCircle :: MonteCarlo TFGen Bool
+inUnitCircle :: RandomGen g => MonteCarlo g Bool
 inUnitCircle = do
     (x,y) <- mcSquareD
     return $ x*x + y*y <= 1
