@@ -16,6 +16,8 @@ cabal-version:       >=1.8
 
 library
   exposed-modules:     Control.Monad.MonteCarlo
+                     , Data.Summary
+                     , Data.Summary.Bool
   -- other-modules:       
   build-depends:       base, mtl, random, parallel
   hs-source-dirs:      src

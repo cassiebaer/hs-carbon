@@ -1,3 +1,4 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Control.Monad.MonteCarlo
   (
     MonteCarlo
@@ -11,24 +12,26 @@ where
 
 import Control.Monad.State
 import Control.Parallel
+import Data.List (foldl')
 import Data.Monoid
+import Data.Summary
 import System.Random
 
 -- | Skeleton for common usage
-experimentS :: (RandomGen g, Monoid s)
-            => MonteCarlo g a -> Int -> g -> (a -> s) -> s
-experimentS m n g f = let xs = runMC (replicateM n m) g
-                       in mconcat (map f xs)
+experimentS :: (RandomGen g, Result a s)
+            => MonteCarlo g a -> Int -> g -> s
+experimentS m n g = let xs = runMC (replicateM n m) g
+                     in foldl' addObs mempty xs
 
 -- | Parallel
-experimentP :: (RandomGen g, Monoid s)
-            => MonteCarlo g a -> Int -> Int -> g -> (a -> s) -> s
-experimentP m n c g f
-    | n <= c    = experimentS m n g f
+experimentP :: (RandomGen g, Result a s)
+            => MonteCarlo g a -> Int -> Int -> g -> s
+experimentP m n c g
+    | n <= c    = experimentS m n g
     | otherwise = s `par` (ss `pseq` mappend s ss)
   where
-    s  = experimentS m c g1 f
-    ss = experimentP m (n-c) c g2 f
+    s  = experimentS m c g1
+    ss = experimentP m (n-c) c g2
     (g1,g2) = split g
 
 -- | Monad representing a MonteCarlo simulation using
