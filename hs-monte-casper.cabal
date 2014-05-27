@@ -36,6 +36,6 @@ executable IntegralExample
 
 executable TransportExample
   hs-source-dirs: src, examples
-  build-depends: base, random, mtl, tf-random, parallel
+  build-depends: base, random, mtl, tf-random, parallel, gloss
   main-is: Transport.hs
   ghc-options: -threaded

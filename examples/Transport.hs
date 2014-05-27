@@ -1,9 +1,11 @@
 module Main where
 
-import Control.Monad (replicateM)
 import Control.Monad.State
+import Control.Monad.Writer
 import Control.Monad.MonteCarlo
 import System.Random.TF
+
+import Graphics.Gloss hiding (Point)
 
 ----------------------------------------------------------------
 -- Data
@@ -13,10 +15,10 @@ rho :: Float
 rho = 1 -- g / cm^3
 
 massCoef :: Energy -> Float
-massCoef _ = 3.031E-02 -- water @ 5MeV
+massCoef x = 3.031E-02 / (1-(x/5001)) -- water @ 5MeV
 
 absCoef :: Energy -> Float
-absCoef _ = 1.915E-02 -- water @ 5MeV
+absCoef x = 1.915E-02 / (1-(x/5001))-- water @ 5MeV
 
 mu_t :: Energy -> Float
 mu_t x = massCoef x * rho
@@ -46,13 +48,13 @@ type History = [Point]
 -- MonteCarlo
 ----------------
 
-type Simulation = StateT ParticleState (MonteCarlo TFGen)
+type Simulation = WriterT [(Point,Energy)] (StateT ParticleState (MonteCarlo TFGen))
 
 eta :: Simulation Float
-eta = lift mcUniform
+eta = lift (lift mcUniform)
 
 etaR :: (Float,Float) -> Simulation Float
-etaR bounds = lift (mcUniformR bounds)
+etaR bounds = lift (lift (mcUniformR bounds))
 
 fly :: Simulation ()
 fly = do
@@ -61,12 +63,12 @@ fly = do
     let s = -(log eta' / mu_t en)
     put (PS i en (x+ux*s,y+uy*s) (ux,uy))
 
-loop :: Simulation Point
+loop :: Simulation ()
 loop = do
     fly
     scatter
     cond <- terminated
-    if cond then exit else loop
+    if cond then return () else loop
 
 exit :: Simulation Point
 exit = gets curPos >>= return
@@ -78,9 +80,10 @@ scatter = do
     (ux',uy') <- if en <= 1000
                  then liftM2 (,) (etaR (-1,1)) (etaR (-1,1))
                  else do
-                         dux <- etaR (-1,1)
-                         duy <- etaR (-1,1)
+                         dux <- etaR (-0.5,0.5)
+                         duy <- etaR (-0.5,0.5)
                          return (ux+dux,uy+duy)
+    tell [((x,y),deltaW)]
     put (PS (i+1) (en-deltaW) (x,y) (ux',uy'))
 
 terminated :: Simulation Bool
@@ -95,6 +98,11 @@ terminated = do
 main :: IO ()
 main = do
     g <- newTFGen
-    let bs = runMC (replicateM 10 (evalStateT loop psInit)) g
-    print bs
-    return ()
+    --let bs = runMC (replicateM 10 (evalStateT (runWriterT loop) psInit)) g
+    let bs = experimentP (evalStateT (execWriterT loop) psInit) 100000 1000 g :: [[(Point,Energy)]]
+    displayResults bs
+
+displayResults res = display (InWindow "Simulation Results" (800,800) (200,200))
+                         blue results
+  where color = makeColor8 255 0 0 10
+        results = mconcat $ map (\path -> Color color $ Line (map fst path)) res
