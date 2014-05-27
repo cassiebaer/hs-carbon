@@ -5,7 +5,7 @@ import Control.Monad.Writer
 import Control.Monad.MonteCarlo
 import System.Random.TF
 
-import Graphics.Gloss hiding (Point)
+import Graphics.Gloss hiding (Point, rotate)
 
 ----------------------------------------------------------------
 -- Data
@@ -67,29 +67,28 @@ loop :: Simulation ()
 loop = do
     fly
     scatter
-    cond <- terminated
-    if cond then return () else loop
-
-exit :: Simulation Point
-exit = gets curPos >>= return
+    en <- gets remEnergy
+    if en < 100 then return () else loop
 
 scatter :: Simulation ()
 scatter = do
     (PS i en (x,y) (ux,uy)) <- get
-    let deltaW = mu_en en / mu_t en * en
-    (ux',uy') <- if en <= 1000
-                 then liftM2 (,) (etaR (-1,1)) (etaR (-1,1))
-                 else do
-                         dux <- etaR (-0.5,0.5)
-                         duy <- etaR (-0.5,0.5)
-                         return (ux+dux,uy+duy)
+    eta' <- eta
+    let deltaW = mu_en en / mu_t en * en * eta'
+    eta'' <- eta
+    let angle = diffAngle deltaW * if eta'' >= 0.5 then 1 else (-1)
+    let (ux',uy') = rotate (ux,uy) angle
     tell [((x,y),deltaW)]
     put (PS (i+1) (en-deltaW) (x,y) (ux',uy'))
 
-terminated :: Simulation Bool
-terminated = do
-    en <- gets remEnergy
-    return $ en < 500
+waveLength :: Energy -> Float
+waveLength en = 1240 / (en * 1000) -- en given in keV
+
+diffAngle :: Energy -> Float
+diffAngle en = acos $ 1 - waveLength en / 0.00243 -- en given in keV
+
+rotate :: Point -> Float -> Point
+rotate (x,y) th = (x*cos th - y*sin th, x*sin th + y*cos th)
 
 ----------------------------------------------------------------
 -- Main
@@ -98,11 +97,12 @@ terminated = do
 main :: IO ()
 main = do
     g <- newTFGen
-    --let bs = runMC (replicateM 10 (evalStateT (runWriterT loop) psInit)) g
-    let bs = experimentP (evalStateT (execWriterT loop) psInit) 100000 1000 g :: [[(Point,Energy)]]
+    let bs = experimentP (evalStateT (execWriterT loop) psInit)
+                         10 1000 g :: [[(Point,Energy)]]
     displayResults bs
 
-displayResults res = display (InWindow "Simulation Results" (800,800) (200,200))
-                         blue results
-  where color = makeColor8 255 0 0 10
-        results = mconcat $ map (\path -> Color color $ Line (map fst path)) res
+displayResults :: [[(Point, Energy)]] -> IO ()
+displayResults res = display (InWindow "Sim." (800,800) (200,200))
+                         blue (results `mappend` Color white (Line [(0,-100),(0,0)]))
+  where color' = makeColor8 255 0 0 200
+        results = mconcat $ map (\path -> Color color' $ Line (map fst path)) res
