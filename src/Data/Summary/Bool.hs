@@ -1,4 +1,5 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+
 module Data.Summary.Bool where
 
 import Data.List (foldl')
@@ -19,3 +20,15 @@ instance Monoid Summary where
 instance Result Bool Summary where
     addObs (Summary s t) True = Summary (s+1) (t+1)
     addObs (Summary s t) False = Summary s (t+1)
+
+sampleMean :: Summary -> Double
+sampleMean (Summary s t) = fromIntegral s / fromIntegral t
+
+sampleSize :: Summary -> Int
+sampleSize (Summary _ t) = t
+
+sampleSE :: Summary -> Double
+sampleSE s = sqrt (p * (1 - p) / n)
+  where
+    p = sampleMean s
+    n = fromIntegral $ sampleSize s

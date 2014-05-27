@@ -33,3 +33,9 @@ executable IntegralExample
   build-depends: base, random, mtl, tf-random, parallel
   main-is: Integral.hs
   ghc-options: -threaded
+
+executable TransportExample
+  hs-source-dirs: src, examples
+  build-depends: base, random, mtl, tf-random, parallel
+  main-is: Transport.hs
+  ghc-options: -threaded

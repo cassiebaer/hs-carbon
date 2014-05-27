@@ -36,7 +36,7 @@ experimentP m n c g
 
 -- | Monad representing a MonteCarlo simulation using
 --    RandomGen instance g and returning a value of type a
-type MonteCarlo g a = State g a
+type MonteCarlo g = State g
 
 runMC :: RandomGen g => MonteCarlo g a -> g -> a
 runMC = evalState

@@ -16,16 +16,16 @@ inUnitCircle = do
     return $ x*x + y*y <= 1
 
 noRuns :: Int
-noRuns = 10000000
+noRuns = 100000000
 
 main :: IO ()
 main = do
     args <- getArgs
     g <- newTFGen
-    let ex = case args of
+    let s = case args of
                  ["-seq"] -> experimentS inUnitCircle noRuns g
                  ["-par",chSize] -> experimentP inUnitCircle noRuns (read chSize) g
                  _ -> error "Use -seq or -par chunksize"
-    let (Summary s t) = ex
-    print $ (4 * (fromIntegral s / fromIntegral t) :: Double)
+    let (m,se) = (4*sampleMean s, 4*sampleSE s)
+    print $ (m-se,m+se)
     return ()
