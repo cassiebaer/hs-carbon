@@ -2,8 +2,11 @@ module Main where
 
 import Control.Monad.State
 import Control.Monad.Writer
+import Control.Monad.Reader
 import Control.Monad.MonteCarlo
+import Control.Monad.RWS
 import System.Random.TF
+import NISTData
 
 import Graphics.Gloss hiding (Point, rotate)
 
@@ -12,19 +15,7 @@ import Graphics.Gloss hiding (Point, rotate)
 ----------------
 
 rho :: Float
-rho = 1 -- g / cm^3
-
-massCoef :: Energy -> Float
-massCoef x = 3.031E-02 / (1-(x/5001)) -- water @ 5MeV
-
-absCoef :: Energy -> Float
-absCoef x = 1.915E-02 / (1-(x/5001))-- water @ 5MeV
-
-mu_t :: Energy -> Float
-mu_t x = massCoef x * rho
-
-mu_en :: Energy -> Float
-mu_en x = absCoef x * rho
+rho = 1
 
 ----------------------------------------------------------------
 -- Datatypes
@@ -48,19 +39,27 @@ type History = [Point]
 -- MonteCarlo
 ----------------
 
-type Simulation = WriterT [(Point,Energy)] (StateT ParticleState (MonteCarlo TFGen))
+type Simulation = RWST (Float -> (Float,Float)) [(Point,Energy)] ParticleState (MonteCarlo TFGen)
+--type Simulation = WriterT [(Point,Energy)] (StateT ParticleState (MonteCarlo TFGen))
+
+getMu :: Simulation (Float,Float)
+getMu = do
+    en <- gets remEnergy
+    (t,a) <- asks (\f -> f en)
+    return (rho*t,rho*a)
 
 eta :: Simulation Float
-eta = lift (lift mcUniform)
+eta = lift mcUniform
 
 etaR :: (Float,Float) -> Simulation Float
-etaR bounds = lift (lift (mcUniformR bounds))
+etaR bounds = lift (mcUniformR bounds)
 
 fly :: Simulation ()
 fly = do
     eta' <- eta
     (PS i en (x,y) (ux,uy)) <- get
-    let s = -(log eta' / mu_t en)
+    (mu_t,_) <- getMu
+    let s = -(log eta' / mu_t)
     put (PS i en (x+ux*s,y+uy*s) (ux,uy))
 
 loop :: Simulation ()
@@ -74,7 +73,8 @@ scatter :: Simulation ()
 scatter = do
     (PS i en (x,y) (ux,uy)) <- get
     eta' <- eta
-    let deltaW = mu_en en / mu_t en * en * eta'
+    (mu_t,mu_en) <- getMu
+    let deltaW = mu_en / mu_t * en * eta'
     eta'' <- eta
     let angle = diffAngle deltaW * if eta'' >= 0.5 then 1 else (-1)
     let (ux',uy') = rotate (ux,uy) angle
@@ -97,12 +97,19 @@ rotate (x,y) th = (x*cos th - y*sin th, x*sin th + y*cos th)
 main :: IO ()
 main = do
     g <- newTFGen
-    let bs = experimentP (evalStateT (execWriterT loop) psInit)
-                         10 1000 g :: [[(Point,Energy)]]
+    fnist <- loadData "water.dat"
+    let bs = experimentP (evalRRWST loop fnist psInit)
+                         10000 1000 g :: [[(Point,Energy)]]
     displayResults bs
+    return ()
 
 displayResults :: [[(Point, Energy)]] -> IO ()
 displayResults res = display (InWindow "Sim." (800,800) (200,200))
                          blue (results `mappend` Color white (Line [(0,-100),(0,0)]))
   where color' = makeColor8 255 0 0 200
         results = mconcat $ map (\path -> Color color' $ Line (map fst path)) res
+
+evalRRWST :: (Monad m) => RWST r w s m a -> r -> s -> m w
+evalRRWST m r s = do
+    ~(_,_,w) <- runRWST m r s
+    return w
