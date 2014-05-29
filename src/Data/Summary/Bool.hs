@@ -17,7 +17,7 @@ instance Monoid Summary where
     mappend (Summary s t) (Summary s' t') = Summary (s+s') (t+t')
     mconcat = foldl' mappend mempty
 
-instance Result Bool Summary where
+instance Result Summary Bool where
     addObs (Summary s t) True = Summary (s+1) (t+1)
     addObs (Summary s t) False = Summary s (t+1)
 

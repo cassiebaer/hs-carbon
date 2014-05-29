@@ -16,7 +16,7 @@ inUnitCircle = do
     return $ x*x + y*y <= 1
 
 noRuns :: Int
-noRuns = 100000000
+noRuns = 10000000
 
 main :: IO ()
 main = do
