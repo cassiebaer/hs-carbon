@@ -6,15 +6,11 @@ import Control.Monad.State
 import Control.Monad.Writer
 import Control.Monad.Reader
 import Control.Monad.MonteCarlo
-import Control.Monad.RWS
 import Control.Monad.Loops
 import Control.DeepSeq
 import Control.Exception
 import System.Random.TF
-import Debug.Trace
 import NISTData
-
-import Data.Summary (Result(..))
 
 import Graphics.Gloss hiding (Point, rotate)
 
@@ -113,7 +109,7 @@ rotate (x,y) th = (x*cos th - y*sin th, x*sin th + y*cos th)
 ----------------
 
 noRuns :: Int
-noRuns = 10000
+noRuns = 1000000
 
 main :: IO ()
 main = do
@@ -132,4 +128,4 @@ displayResults :: [[(Point, Energy)]] -> IO ()
 displayResults res = display (InWindow "Sim." (800,800) (200,200))
                          white (results `mappend` Color white (Line [(0,-100),(0,0)]))
   where color' = makeColor8 0 0 0 5
-        results = mconcat $ map (\path -> Color color' $ Line (map fst path)) res
+        results = mconcat $ map (\p -> Color color' $ Line (map fst p)) res

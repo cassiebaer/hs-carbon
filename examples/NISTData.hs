@@ -1,7 +1,5 @@
 module NISTData where
 
-import System.Environment
-
 type DataEntry = (Float,Float,Float)
 type NISTData = [DataEntry]
 
