@@ -15,6 +15,7 @@ findData [] _ = error "no data in file!"
 findData (d@(x,_,_):d'@(x',_,_):xs) e
     | x <= e && e < x' = (d,d')
     | otherwise        = findData (d':xs) e
+findData _ _ = error "Failure in function findData"
 
 nistLookup :: NISTData -> Float -> (Float,Float)
 nistLookup dat en

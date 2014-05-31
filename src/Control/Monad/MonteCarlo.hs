@@ -1,4 +1,4 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE BangPatterns #-}
 module Control.Monad.MonteCarlo
   (
@@ -8,33 +8,32 @@ module Control.Monad.MonteCarlo
   , runMC
   , mcUniform
   , mcUniformR
+  , RandomGen
   )
 where
 
 import Control.Monad.State
 import Control.Parallel
 import Data.List (foldl')
-import Data.Monoid
 import Data.Summary
 import System.Random
 
--- | XX: space leak? requires increased stack storage on Transport2.hs
 -- | Skeleton for common usage
-experimentS :: (RandomGen g, Result s a)
-            => MonteCarlo g a -> Int -> g -> s
+experimentS :: (RandomGen g, Result s)
+            => MonteCarlo g (Obs s) -> Int -> g -> s
 experimentS m n g = let xs = runMC (replicateM n m) g
-                     in foldl' addObs mempty xs
+                     in foldl' addObs rzero xs
 
 -- | Parallel
-experimentP :: (RandomGen g, Result s a)
-            => MonteCarlo g a -> Int -> Int -> g -> s
+experimentP :: (RandomGen g, Result s)
+            => MonteCarlo g (Obs s) -> Int -> Int -> g -> s
 experimentP m n c g
     | n <= c    = experimentS m n g
-    | otherwise = s `par` (ss `pseq` mappend s ss)
+    | otherwise = s `par` (ss `pseq` (s `rjoin` ss))
   where
     s  = experimentS m c g1
     ss = experimentP m (n-c) c g2
-    !(g1,g2) = split g
+    !(!g1,!g2) = split g
 
 -- | Monad representing a MonteCarlo simulation using
 --    RandomGen instance g and returning a value of type a

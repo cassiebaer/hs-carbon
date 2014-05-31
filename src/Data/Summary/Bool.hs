@@ -1,33 +1,29 @@
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeFamilies #-}
 
 module Data.Summary.Bool where
 
-import Data.List (foldl')
-import Data.Monoid
-import Data.Summary
+import Data.Summary (Result(..))
 
-data Summary = Summary
+data BoolSumm = BoolSumm
                  {
                    noSuccess :: !Int
                  , noTotal   :: !Int
                  }
 
-instance Monoid Summary where
-    mempty = Summary 0 0
-    mappend (Summary s t) (Summary s' t') = Summary (s+s') (t+t')
-    mconcat = foldl' mappend mempty
+instance Result BoolSumm where
+    type Obs BoolSumm = Bool
+    addObs (BoolSumm s t) True = (BoolSumm (s+1) (t+1))
+    addObs (BoolSumm s t) False = (BoolSumm s (t+1))
+    rjoin (BoolSumm s t) (BoolSumm s' t') = BoolSumm (s+s') (t+t')
+    rzero = BoolSumm 0 0
 
-instance Result Summary Bool where
-    addObs (Summary s t) True = Summary (s+1) (t+1)
-    addObs (Summary s t) False = Summary s (t+1)
+sampleMean :: BoolSumm -> Double
+sampleMean (BoolSumm s t) = fromIntegral s / fromIntegral t
 
-sampleMean :: Summary -> Double
-sampleMean (Summary s t) = fromIntegral s / fromIntegral t
+sampleSize :: BoolSumm -> Int
+sampleSize (BoolSumm _ t) = t
 
-sampleSize :: Summary -> Int
-sampleSize (Summary _ t) = t
-
-sampleSE :: Summary -> Double
+sampleSE :: BoolSumm -> Double
 sampleSE s = sqrt (p * (1 - p) / n)
   where
     p = sampleMean s
