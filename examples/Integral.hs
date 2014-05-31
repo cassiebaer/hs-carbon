@@ -27,6 +27,6 @@ noRuns = 10000000
 main :: IO ()
 main = do
     g <- newTFGen
-    let (Summary s t) = experimentP (isUnderCurve sin) noRuns 200000 g
-    print $ fromIntegral s / fromIntegral t * (upperBound * rightBound)
+    let s = experimentP (isUnderCurve sin) noRuns 200000 g
+    print $ sampleMean s * (upperBound * rightBound)
     return ()
