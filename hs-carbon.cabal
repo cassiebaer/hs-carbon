@@ -24,6 +24,7 @@ flag buildExamples
 library
   exposed-modules:     Control.Monad.MonteCarlo
                      , Data.Result
+                     , Data.Summary
                      , Data.Summary.Bool
   -- other-modules:       
   build-depends:

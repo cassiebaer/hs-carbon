@@ -1,8 +1,11 @@
 {-# LANGUAGE TypeFamilies #-}
 
-module Data.Summary.Bool where
+module Data.Summary.Bool
+  (BoolSumm, Summary(..))
+  where
 
 import Data.Result (Result(..))
+import Data.Summary (Summary(..))
 
 data BoolSumm = BoolSumm
                  {
@@ -17,14 +20,10 @@ instance Result BoolSumm where
     rjoin (BoolSumm s t) (BoolSumm s' t') = BoolSumm (s+s') (t+t')
     rzero = BoolSumm 0 0
 
-sampleMean :: BoolSumm -> Double
-sampleMean (BoolSumm s t) = fromIntegral s / fromIntegral t
-
-sampleSize :: BoolSumm -> Int
-sampleSize (BoolSumm _ t) = t
-
-sampleSE :: BoolSumm -> Double
-sampleSE s = sqrt (p * (1 - p) / n)
-  where
-    p = sampleMean s
-    n = fromIntegral $ sampleSize s
+instance Summary BoolSumm where
+    sampleMean (BoolSumm s t) = fromIntegral s / fromIntegral t
+    sampleSE s = sqrt (p * (1 - p) / n)
+      where
+        p = sampleMean s
+        n = fromIntegral $ sampleSize s
+    sampleSize (BoolSumm _ t) = t

@@ -23,6 +23,6 @@ noRuns = 1000000
 main :: IO ()
 main = do
     g <- newTFGen
-    let s = experimentP (isUnderCurve sin) noRuns 200000 g
+    let s = experimentP (isUnderCurve sin) noRuns 200000 g :: BoolSumm
     let ((_,r),(_,u)) = bounds
     print $ sampleMean s * r * u
