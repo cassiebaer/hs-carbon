@@ -14,7 +14,6 @@ where
 import Control.Monad.State
 import Control.Parallel
 import Data.List (foldl')
-import Data.Monoid
 import Data.Summary
 import System.Random
 

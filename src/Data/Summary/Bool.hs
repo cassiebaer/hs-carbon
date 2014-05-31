@@ -2,7 +2,6 @@
 
 module Data.Summary.Bool where
 
-import Data.List (foldl')
 import Data.Summary (Result(..))
 
 data BoolSumm = BoolSumm
