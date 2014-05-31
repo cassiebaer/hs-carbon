@@ -2,7 +2,7 @@
 
 module Data.Summary.Bool where
 
-import Data.Summary (Result(..))
+import Data.Result (Result(..))
 
 data BoolSumm = BoolSumm
                  {
