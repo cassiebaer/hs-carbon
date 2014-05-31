@@ -1,5 +1,5 @@
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE TypeFamilies, BangPatterns #-}
+
 module Control.Monad.MonteCarlo
   (
     MonteCarlo
@@ -8,14 +8,14 @@ module Control.Monad.MonteCarlo
   , runMC
   , mcUniform
   , mcUniformR
-  , RandomGen
+  , RandomGen -- export RandomGen for convenience
   )
 where
 
 import Control.Monad.State
 import Control.Parallel
 import Data.List (foldl')
-import Data.Summary
+import Data.Result
 import System.Random
 
 -- | Skeleton for common usage
