@@ -8,6 +8,7 @@ module Control.Monad.MonteCarlo
   , runMC
   , mcUniform
   , mcUniformR
+  , RandomGen
   )
 where
 
