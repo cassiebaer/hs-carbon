@@ -50,9 +50,9 @@ getMu = do
 
 -- Helper functions for sampling random numbers
 uniform :: Simulation Float
-uniform = lift (lift mcUniform)
+uniform = lift (lift random)
 uniformR :: (Float,Float) -> Simulation Float
-uniformR bounds = lift (lift (mcUniformR bounds))
+uniformR bounds = lift (lift (randomR bounds))
 
 -- Flies the particle some random distance with prob. according to
 --  cross-section data

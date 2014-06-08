@@ -6,7 +6,7 @@ import Data.Summary.Bool
 import System.Random.TF
 
 mcSquareD :: RandomGen g => MonteCarlo g (Double,Double)
-mcSquareD = liftM2 (,) (mcUniformR (-1,1)) (mcUniformR (-1,1))
+mcSquareD = liftM2 (,) (randomR (-1,1)) (randomR (-1,1))
 
 inUnitCircle :: RandomGen g => MonteCarlo g Bool
 inUnitCircle = do

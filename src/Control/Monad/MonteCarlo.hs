@@ -10,9 +10,8 @@
 -- Stability   :  unstable
 -- Portability :  portable
 --
--- The goal of Carbon is to capture idiomatic usage patterns for Monte
--- Carlo simulations in an easy to use interface. Currently, only one
--- pattern is implemented but more are planned.
+-- The goal of Carbon is to capture idiomatic usage patterns for Monte Carlo simulations in an easy to use interface.
+-- Currently, only one pattern is implemented but more are planned.
 --
 -- There are two main parts to the library:
 --
@@ -35,9 +34,9 @@ module Control.Monad.MonteCarlo
     -- $buildingsims
   , runMC
   , evalMC
-  , mcUniform
-  , mcUniformR
-  , RandomGen -- export RandomGen for convenience
+  , random
+  , randomR
+  , R.RandomGen -- export RandomGen for convenience
   )
 where
 
@@ -45,7 +44,7 @@ import Control.Monad.State
 import Control.Parallel
 import Data.List (foldl')
 import Data.Result
-import System.Random
+import qualified System.Random as R
 
 {- $runningsims #runningsims#
 Running simulations should be done using the high level functions provided here.
@@ -65,7 +64,7 @@ Additionally, more complex simulations can layer monad transformers overtop of '
 type MonteCarlo g = State g
 
 -- | This is a high level function for running a full Monte Carlo simulation.
--- It takes a 'MonteCarlo' action, the number of observations to aggregate, and an instance of 'System.Random.RandomGen'.
+-- It takes a 'MonteCarlo' action, the number of observations to aggregate, and an instance of 'RandomGen' from "System.Random".
 -- The return value is dictated by the type family 'Data.Result'; a type annotation is required to specify how observations should be aggregated.
 --
 -- For example, given a 'MonteCarlo' action, mySim, with type:
@@ -77,7 +76,7 @@ type MonteCarlo g = State g
 -- > experimentS mySimulation 100 g :: [Bool]
 -- > experimentS mySimulation 100 g :: BoolSumm
 --
-experimentS :: (RandomGen g, Result s)
+experimentS :: (R.RandomGen g, Result s)
             => MonteCarlo g (Obs s) -> Int -> g -> s
 experimentS m n g = let xs = evalMC (replicateM n m) g
                      in foldl' addObs rzero xs
@@ -88,7 +87,7 @@ experimentS m n g = let xs = evalMC (replicateM n m) g
 --
 -- Note: you must compile an executable with the -threaded flag in order for sparks to run in parallel.
 --
-experimentP :: (RandomGen g, Result s)
+experimentP :: (R.RandomGen g, Result s)
             => MonteCarlo g (Obs s) -> Int -> Int -> g -> s
 experimentP m n c g
     | c <= 0    = error "Chunk size must be positive"
@@ -97,27 +96,26 @@ experimentP m n c g
   where
     s  = experimentS m c g1
     ss = experimentP m (n-c) c g2
-    !(!g1,!g2) = split g
+    !(!g1,!g2) = R.split g
 
-runMC :: RandomGen g => MonteCarlo g a -> g -> (a,g)
+-- | 'runMC' is just an alias for 'runState'.
+runMC :: R.RandomGen g => MonteCarlo g a -> g -> (a,g)
 runMC = runState
 
-evalMC :: RandomGen g => MonteCarlo g a -> g -> a
+-- | 'evalMC' is just an alias for 'evalState'.
+evalMC :: R.RandomGen g => MonteCarlo g a -> g -> a
 evalMC = evalState
 
-mcNext :: RandomGen g => (g -> (a,g)) -> MonteCarlo g a
+-- | 'mcNext' is just a higher-order function which runs typical "System.Random" functions and updates the internal state.
+mcNext :: R.RandomGen g => (g -> (a,g)) -> MonteCarlo g a
 mcNext f = do
     !g <- get
     let !(!x,!g') = f g
     put g'
     return x
 
-mcUniform :: (RandomGen g, Random a) => MonteCarlo g a
-mcUniform = do
-    !g <- get
-    let !(!x,!g') = random g
-    put g'
-    return x
+random :: (R.RandomGen g, R.Random a) => MonteCarlo g a
+random = mcNext R.random
 
-mcUniformR :: (RandomGen g, Random a) => (a,a) -> MonteCarlo g a
-mcUniformR !bounds = mcNext (randomR bounds)
+randomR :: (R.RandomGen g, R.Random a) => (a,a) -> MonteCarlo g a
+randomR !bounds = mcNext (R.randomR bounds)

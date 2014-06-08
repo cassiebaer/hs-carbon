@@ -13,8 +13,8 @@ bounds = ((0,pi),(0,1))
 
 isUnderCurve :: RandomGen g => (Double -> Double) -> MonteCarlo g Bool
 isUnderCurve f = do
-    x <- mcUniformR (fst bounds)
-    y <- mcUniformR (snd bounds)
+    x <- randomR (fst bounds)
+    y <- randomR (snd bounds)
     return $ y <= f x
 
 noRuns :: Int
