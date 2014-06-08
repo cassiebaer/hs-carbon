@@ -2,7 +2,6 @@ module Main where
 
 import Control.Monad (liftM2)
 import Control.Monad.MonteCarlo
-import Data.Summary (Summary(..))
 import Data.Summary.Bool
 import System.Random.TF
 

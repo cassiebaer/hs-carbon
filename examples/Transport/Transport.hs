@@ -76,14 +76,18 @@ exit = do
     ps <- gets path
     return $ ps
 
+_scatterDir :: Simulation Float
+_scatterDir = do
+    eta <- uniform
+    return $ if eta >= 0.5 then 1 else (-1)
+
 scatter :: Simulation ()
 scatter = do
     (PS i en (x,y) (ux,uy) ps) <- get
     (mu_t,mu_en) <- getMu
-    eta <- uniformR (0,2)
-    let deltaW = mu_en * en / mu_t -- * eta
-    eta' <- uniform
-    let angle = diffAngle en (en-deltaW) * if eta' >= 0.5 then 1 else (-1)
+    let deltaW = mu_en * en / mu_t
+    dir <- _scatterDir
+    let angle = diffAngle en (en-deltaW) * dir
     let (ux',uy') = rotate (ux,uy) angle
     put (PS (i+1) (en-deltaW) (x,y) (ux',uy') (ps++[((x,y),deltaW)]))
 
@@ -111,7 +115,9 @@ main = do
     let bs = experimentP (unrolled)
                          noRuns (noRuns `div` 200) g :: [[(Point,Energy)]]
     evaluate (rnf bs)
-    print $ (foldl' (+) 0 (map (fromIntegral . length) bs)) / fromIntegral (length bs)
+    let lengthF = fromIntegral . length
+    let avgCol = (foldl' (+) 0 (map lengthF bs)) / lengthF bs :: Double
+    print avgCol
     --displayResults bs
 
 displayResults :: [[(Point, Energy)]] -> IO ()
