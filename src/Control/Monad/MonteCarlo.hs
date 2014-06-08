@@ -34,6 +34,7 @@ module Control.Monad.MonteCarlo
     -- * Building Simulations
     -- $buildingsims
   , runMC
+  , evalMC
   , mcUniform
   , mcUniformR
   , RandomGen -- export RandomGen for convenience
@@ -78,7 +79,7 @@ type MonteCarlo g = State g
 --
 experimentS :: (RandomGen g, Result s)
             => MonteCarlo g (Obs s) -> Int -> g -> s
-experimentS m n g = let xs = runMC (replicateM n m) g
+experimentS m n g = let xs = evalMC (replicateM n m) g
                      in foldl' addObs rzero xs
 
 -- | This is a high level function for running a full Monte Carlo simulation in parallel.
@@ -98,8 +99,11 @@ experimentP m n c g
     ss = experimentP m (n-c) c g2
     !(!g1,!g2) = split g
 
-runMC :: RandomGen g => MonteCarlo g a -> g -> a
-runMC = evalState
+runMC :: RandomGen g => MonteCarlo g a -> g -> (a,g)
+runMC = runState
+
+evalMC :: RandomGen g => MonteCarlo g a -> g -> a
+evalMC = evalState
 
 mcNext :: RandomGen g => (g -> (a,g)) -> MonteCarlo g a
 mcNext f = do
