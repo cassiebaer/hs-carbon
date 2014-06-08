@@ -3,15 +3,16 @@
 module Data.Result where
 
 import Control.DeepSeq
+import Data.Monoid
 
 class Result r where
-    type Obs r :: *
-    addObs :: r -> Obs r -> r
-    rjoin  :: r -> r -> r
-    rzero  :: r
+    type Obs r :: *           -- type of obs.
+    addObs :: r -> Obs r -> r -- add an observation
+    rjoin  :: r -> r -> r     -- join two results
+    rzero  :: r               -- result sans observations
 
 instance NFData a => Result [a] where
     type Obs [a] = a
     addObs r o   = o `deepseq` (o : r)
-    rjoin        = (++)
-    rzero        = []
+    rjoin        = mappend
+    rzero        = mempty

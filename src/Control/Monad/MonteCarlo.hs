@@ -28,6 +28,7 @@ experimentS m n g = let xs = runMC (replicateM n m) g
 experimentP :: (RandomGen g, Result s)
             => MonteCarlo g (Obs s) -> Int -> Int -> g -> s
 experimentP m n c g
+    | c <= 0    = error "Chunk size must be positive"
     | n <= c    = experimentS m n g
     | otherwise = s `par` (ss `pseq` (s `rjoin` ss))
   where
@@ -44,13 +45,17 @@ runMC = evalState
 
 mcNext :: RandomGen g => (g -> (a,g)) -> MonteCarlo g a
 mcNext f = do
-    g <- get
-    let (x,g') = f g
+    !g <- get
+    let !(!x,!g') = f g
     put g'
     return x
 
 mcUniform :: (RandomGen g, Random a) => MonteCarlo g a
-mcUniform = mcNext random
+mcUniform = do
+    !g <- get
+    let !(!x,!g') = random g
+    put g'
+    return x
 
 mcUniformR :: (RandomGen g, Random a) => (a,a) -> MonteCarlo g a
 mcUniformR !bounds = mcNext (randomR bounds)

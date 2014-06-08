@@ -1,3 +1,5 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Main where
 
 import Control.Monad.State
@@ -9,6 +11,7 @@ import Control.DeepSeq
 import Control.Exception
 import System.Random.TF
 import NISTData
+import Data.List (foldl')
 
 import Graphics.Gloss hiding (Point, rotate)
 
@@ -22,7 +25,7 @@ data ParticleState = PS
                      , remEnergy :: !Energy
                      , curPos    :: !Point
                      , curDir    :: !Angle
-                     , path      :: ![(Point,Energy)]
+                     , path      :: [(Point,Energy)]
                      } deriving (Show)
 psInit :: ParticleState
 psInit = PS 0 5000 (0,0) (0,1) []
@@ -54,7 +57,7 @@ fly :: Simulation ()
 fly = do
     (PS i en (x,y) (ux,uy) ps) <- get
     (mu_t,_) <- getMu
-    eta <- uniform
+    !eta <- uniform
     let s = -(log eta / mu_t)
     put (PS i en (x+ux*s,y+uy*s) (ux,uy) ps)
 
@@ -78,7 +81,7 @@ scatter = do
     (PS i en (x,y) (ux,uy) ps) <- get
     (mu_t,mu_en) <- getMu
     eta <- uniformR (0,2)
-    let deltaW = mu_en * en / mu_t * eta
+    let deltaW = mu_en * en / mu_t -- * eta
     eta' <- uniform
     let angle = diffAngle en (en-deltaW) * if eta' >= 0.5 then 1 else (-1)
     let (ux',uy') = rotate (ux,uy) angle
@@ -98,7 +101,7 @@ rotate (x,y) th = (x*cos th - y*sin th, x*sin th + y*cos th)
 ----------------
 
 noRuns :: Int
-noRuns = 1000000
+noRuns = 10000
 
 main :: IO ()
 main = do
@@ -108,10 +111,11 @@ main = do
     let bs = experimentP (unrolled)
                          noRuns (noRuns `div` 200) g :: [[(Point,Energy)]]
     evaluate (rnf bs)
-    displayResults bs
+    print $ (foldl' (+) 0 (map (fromIntegral . length) bs)) / fromIntegral (length bs)
+    --displayResults bs
 
 displayResults :: [[(Point, Energy)]] -> IO ()
 displayResults res = display (InWindow "Sim." (800,800) (200,200))
                          white (results `mappend` Color white (Line [(0,-100),(0,0)]))
-  where color' = makeColor8 0 0 0 5
+  where color' = makeColor8 0 0 0 100
         results = mconcat $ map (\p -> Color color' $ Line (map fst p)) res
