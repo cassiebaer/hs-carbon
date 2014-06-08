@@ -20,6 +20,7 @@
 -- * The 'Data.Result' type family for describing how to aggregate results
 --
 -- Running a simulation will require a basic understanding of how to use both.
+-- Control.Monad.MonteCarlo exports the 'System.Random.RandomGen' typeclass for convenience.
 --
 -----------------------------------------------------------------------------
 
@@ -64,7 +65,7 @@ Additionally, more complex simulations can layer monad transformers overtop of '
 type MonteCarlo g = State g
 
 -- | This is a high level function for running a full Monte Carlo simulation.
--- It takes a 'MonteCarlo' action, the number of observations to aggregate, and an instance of 'RandomGen' from "System.Random".
+-- It takes a 'MonteCarlo' action, the number of observations to aggregate, and an instance of 'System.Random.RandomGen'.
 -- The return value is dictated by the type family 'Data.Result'; a type annotation is required to specify how observations should be aggregated.
 --
 -- For example, given a 'MonteCarlo' action, mySim, with type:
@@ -98,15 +99,15 @@ experimentP m n c g
     ss = experimentP m (n-c) c g2
     !(!g1,!g2) = R.split g
 
--- | 'runMC' is just an alias for 'runState'.
+-- | 'runMC' is an alias for 'runState'.
 runMC :: R.RandomGen g => MonteCarlo g a -> g -> (a,g)
 runMC = runState
 
--- | 'evalMC' is just an alias for 'evalState'.
+-- | 'evalMC' is an alias for 'evalState'.
 evalMC :: R.RandomGen g => MonteCarlo g a -> g -> a
 evalMC = evalState
 
--- | 'mcNext' is just a higher-order function which runs typical "System.Random" functions and updates the internal state.
+-- | 'mcNext' is a higher-order function which runs typical "System.Random" functions and updates the internal state.
 mcNext :: R.RandomGen g => (g -> (a,g)) -> MonteCarlo g a
 mcNext f = do
     !g <- get
@@ -114,8 +115,10 @@ mcNext f = do
     put g'
     return x
 
+-- | 'random' calls 'System.Random.random' and updates the internal state
 random :: (R.RandomGen g, R.Random a) => MonteCarlo g a
 random = mcNext R.random
 
+-- | 'randomR' calls 'System.Random.randomR' and updates the internal state
 randomR :: (R.RandomGen g, R.Random a) => (a,a) -> MonteCarlo g a
 randomR !bounds = mcNext (R.randomR bounds)
