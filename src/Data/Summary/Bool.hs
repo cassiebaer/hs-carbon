@@ -9,8 +9,8 @@ import Data.Summary (Summary(..))
 
 data BoolSumm = BoolSumm
                  {
-                   noSuccess :: !Int
-                 , noTotal   :: !Int
+                   _noSuccess :: !Int
+                 , _noTotal   :: !Int
                  }
 
 instance Result BoolSumm where

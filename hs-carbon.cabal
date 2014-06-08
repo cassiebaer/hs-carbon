@@ -26,7 +26,6 @@ library
                      , Data.Result
                      , Data.Summary
                      , Data.Summary.Bool
-                     , Data.Summary.Double
   -- other-modules:       
   build-depends:
     base == 4.*, mtl, random, parallel, deepseq
@@ -42,24 +41,18 @@ executable PiExample
   build-depends:
     base == 4.*, random, mtl, tf-random, parallel, deepseq
   main-is: Pi.hs
-  ghc-options: -threaded -O3 -prof
+  ghc-options: -Wall -threaded -O3
 
 executable IntegralExample
   hs-source-dirs: src, examples
-  if flag(buildExamples)
-    build-depends:
-      base == 4.*, random, mtl, tf-random, parallel, deepseq
-  else
-    buildable: False
+  build-depends:
+    base == 4.*, random, mtl, tf-random, parallel, deepseq
   main-is: Integral.hs
-  ghc-options: -threaded -O3
+  ghc-options: -Wall -threaded -O3
 
 executable TransportExample
   hs-source-dirs: src, examples
-  --if flag(buildExamples)
   build-depends:
       base == 4.*, random, mtl, tf-random, parallel, gloss, monad-loops, deepseq
-  --else
-    -- buildable: False
-  main-is: Transport.hs
-  ghc-options: -threaded -O3
+  main-is: Transport/Transport.hs
+  ghc-options: -Wall -threaded -O3
