@@ -1,4 +1,4 @@
-module NISTData where
+module Transport.NISTData where
 
 type DataEntry = (Float,Float,Float)
 type NISTData = [DataEntry]

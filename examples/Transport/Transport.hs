@@ -10,7 +10,7 @@ import Control.Monad.Loops
 import Control.DeepSeq
 import Control.Exception
 import System.Random.TF
-import NISTData
+import Transport.NISTData
 import Data.List (foldl')
 
 import Graphics.Gloss hiding (Point, rotate)
