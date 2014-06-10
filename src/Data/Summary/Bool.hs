@@ -7,6 +7,7 @@ module Data.Summary.Bool
 import Data.Result (Result(..))
 import Data.Summary (Summary(..))
 
+-- | A 'BoolSumm' counts the number of True and all events observed.
 data BoolSumm = BoolSumm
                  {
                    _noSuccess :: !Int
