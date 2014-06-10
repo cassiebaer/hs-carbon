@@ -10,7 +10,7 @@ Carbon is an open-source, Haskell framework aiming to provide easy access to par
 
 _Updated: 2014/06/10_
 
-Version 0.0.0.2 released!
+Version 0.0.1.0 released!
 
 Current features:
 * support for parallelism (using 'Control.Parallel.Strategies.Eval')
