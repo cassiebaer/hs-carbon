@@ -4,7 +4,7 @@ A Haskell framework for (parallel) monte-carlo simulations.
 
 ### What is it?
 
-Carbon is an open-source, Haskell framework aiming to provide easy access to parallel Monte Carlo simulations by providing a simple, but powerful compo- sitional method for building simulations and high-level functions for running them.
+Carbon is an open-source, Haskell framework aiming to provide easy access to parallel Monte Carlo simulations by providing a simple, but powerful compositional method for building simulations and high-level functions for running them.
 
 ### Status
 
