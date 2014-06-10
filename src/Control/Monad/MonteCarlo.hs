@@ -42,7 +42,7 @@ module Control.Monad.MonteCarlo
 where
 
 import Control.Monad.State
-import Control.Parallel
+import Control.Parallel.Strategies
 import Data.List (foldl')
 import Data.Result
 import qualified System.Random as R
@@ -93,11 +93,11 @@ experimentP :: (R.RandomGen g, Result s)
 experimentP m n c g
     | c <= 0    = error "Chunk size must be positive"
     | n <= c    = experimentS m n g
-    | otherwise = s `par` (ss `pseq` (s `rjoin` ss))
-  where
-    s  = experimentS m c g1
-    ss = experimentP m (n-c) c g2
-    !(!g1,!g2) = R.split g
+    | otherwise = runEval $ do
+                    let !(!g1,!g2) = R.split g
+                    s  <- rpar $ experimentS m c g1
+                    ss <- rpar $ experimentP m (n-c) c g2
+                    return (s `rjoin` ss)
 
 -- | 'runMC' is an alias for 'runState'.
 runMC :: R.RandomGen g => MonteCarlo g a -> g -> (a,g)
