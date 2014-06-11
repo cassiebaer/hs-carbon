@@ -3,9 +3,10 @@ name:                hs-carbon
 version:             0.0.1.0
 synopsis:            A Haskell framework for parallel monte carlo simulations
 description:
-  hs-carbon is a PRNG-agnostic Haskell framework for running monte-carlo
-  simulations. The library will provide several "skeletons" for abstracting
-  away common usage patterns.
+  Carbon is an open-source, Haskell framework aiming to provide easy access to
+  parallel Monte Carlo simulations by providing a simple, but powerful
+  compositional method for building simulations and high-level functions for
+  running them.
 license:             MIT
 license-file:        LICENSE
 author:              Casper M. H. Holmgreen
