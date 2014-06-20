@@ -96,7 +96,7 @@ experimentP m n c g
     | otherwise = runEval $ do
                     let !(!g1,!g2) = R.split g
                     s  <- rpar $ experimentS m c g1
-                    ss <- rpar $ experimentP m (n-c) c g2
+                    ss <- rseq $ experimentP m (n-c) c g2
                     return (s `rjoin` ss)
 
 -- | 'runMC' is an alias for 'runState'.
