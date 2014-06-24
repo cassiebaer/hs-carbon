@@ -6,6 +6,8 @@ A Haskell framework for (parallel) monte-carlo simulations.
 
 Carbon is an open-source, Haskell framework aiming to provide easy access to parallel Monte Carlo simulations by providing a simple, but powerful compositional method for building simulations and high-level functions for running them.
 
+Examples of simulations written in Carbon can be found at: https://github.com/icasperzen/hs-carbon-examples
+
 ### Features
 
 #### Monadic Composition
