@@ -114,11 +114,14 @@ mcNext f = do
     let !(!x,!g') = f g
     put g'
     return x
+{-# INLINE mcNext #-}
 
 -- | 'random' calls 'System.Random.random' and updates the internal state
 random :: (R.RandomGen g, R.Random a) => MonteCarlo g a
 random = mcNext R.random
+{-# INLINE random #-}
 
 -- | 'randomR' calls 'System.Random.randomR' and updates the internal state
 randomR :: (R.RandomGen g, R.Random a) => (a,a) -> MonteCarlo g a
-randomR !bounds = mcNext (R.randomR bounds)
+randomR !(!l,!u) = mcNext (R.randomR (l,u))
+{-# INLINE randomR #-}
