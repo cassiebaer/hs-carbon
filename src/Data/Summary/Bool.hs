@@ -7,6 +7,7 @@ module Data.Summary.Bool
 import Data.Result (Result(..))
 import Data.Summary (Summary(..))
 import Data.List (foldl')
+import Control.DeepSeq (NFData(..))
 
 -- | A 'BoolSumm' counts the number of True and all events observed.
 data BoolSumm = BoolSumm
@@ -14,6 +15,8 @@ data BoolSumm = BoolSumm
                    _noSuccess :: !Int
                  , _noTotal   :: !Int
                  }
+
+instance NFData BoolSumm
 
 boolSumm :: [Bool] -> BoolSumm
 boolSumm = foldl' addObs rzero
