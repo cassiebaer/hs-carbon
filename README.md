@@ -6,7 +6,8 @@ A Haskell framework for (parallel) monte-carlo simulations.
 
 Carbon is an open-source, Haskell framework aiming to provide easy access to parallel Monte Carlo simulations by providing a simple, but powerful compositional method for building simulations, high-level functions for running them, and efficient data structures for aggregating common data types.
 
-Examples of simulations written in Carbon can be found at: https://github.com/icasperzen/hs-carbon-examples
+Examples of simulations written in Carbon can be found at:
+https://github.com/icasperzen/hs-carbon-examples
 
 ### Features
 
@@ -38,26 +39,38 @@ experimentP :: (R.RandomGen g, Result s)
             => MonteCarlo g (Obs s) -> Int -> Int -> g -> s
 ```
 
+For example, using `inUnitCircle`, we can compute the value of pi.
+
+```Haskell
+let res = experimentP inUnitCircle noRuns chSize gen
+    pi  = 4 * sampleMean res
+```
+
 #### Data Aggregation
 
 Descriptions of simulations should be completely independent of the results desired.
 Carbon enforces this separation of concerns by using type families.
 Every simulation will require a type annotation describing the desired output.
 The particular instance of the type family describes how data aggregation is to occur (what to do with each observation).
-For example, the following two simulations use the same `MonteCarlo` action, but different data aggregation techniques:
+For example, the following two simulations use the same `MonteCarlo` action, but deliver very different results.
 
 ```Haskell
-let s = experimentP inUnitCircle noRuns chnkSize gen :: BoolSumm
-let t = experimentP inUnitCircle noRuns chnkSize gen :: [Bool]
+let bl = experimentP inUnitCircle noRuns chnkSize gen :: [Bool]
+let bs = experimentP inUnitCircle noRuns chnkSize gen :: BoolSumm
 ```
 
-`BoolSumm` is an instance of the `Result` type class/family.
+`[Bool]` is a list containing every observation from the simulation.
+This is inefficient, however, as it is rarely necessary to maintain each and every observation in memory.
+Instead, we can fold it into a clever data structure.
+`BoolSumm` is a space-efficient representation of binary observations.
+
+The `Result` typeclass captures this functionality.
 
 #### Basic Statistics
 
-Carbon provides functionality for computing basic statistics on many types of data.
-The `Summary` typeclass is aimed to capture the most common statistical measures (though, there is no guarantee that all data types will satisfy the full type-class).
-Creating new instances of `Summary` is easy and extra functions can be written to capture even more complex statistical functionality if necessary.
+Carbon provides functionality for computing basic statistics on some instances of `Result`.
+The `Summary` typeclass is meant to capture some of the common statistical measures one might be interested in.
+Creating new instances of `Summary` is easy; and extra functions can be written for a `Result` instance to capture even more complex statistical functionality.
 
 ### Status
 
