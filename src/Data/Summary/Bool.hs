@@ -34,5 +34,9 @@ instance Summary BoolSumm where
         p = sampleMean s
         n = fromIntegral $ sampleSize s
     sampleSize (BoolSumm _ t) = t
-    sampleSD  = undefined
-    sampleVar = undefined
+    sampleSD  = error ("sampleSD" ++ undefBinObs)
+    sampleVar = error ("sampleVar" ++ undefBinObs)
+
+undefBinObs :: String
+undefBinObs =  " is undefined for binary observations. Please contact"
+            ++ " the package maintainer if you can define it."
