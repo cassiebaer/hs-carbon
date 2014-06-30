@@ -7,6 +7,8 @@ import Data.Summary (Summary(..))
 import Data.List (foldl')
 import Control.DeepSeq (NFData(..))
 
+-- | Computes running stats as demonstrated by
+--    http://www.johndcook.com/skewness_kurtosis.html
 data DoubleSumm = DoubleSumm {
                     _m1   :: !Double
                   , _m2   :: !Double
@@ -35,10 +37,8 @@ instance Result DoubleSumm where
     rzero = DoubleSumm 0 0 0
 
 instance Summary DoubleSumm where
-    sampleMean  = _m1
-    sampleSE ds = s / sqrt n
-      where n = fromIntegral (_size ds)
-            s = sqrt v
-            v = _m2 ds / (n - 1)
-    sampleSize  = _size
-
+    sampleMean   = _m1
+    sampleVar ds = _m2 ds / fromIntegral (_size ds - 1)
+    sampleSD     = sqrt . sampleVar
+    sampleSE ds  = sampleSD ds / sqrt (fromIntegral (_size ds))
+    sampleSize   = _size

@@ -34,3 +34,5 @@ instance Summary BoolSumm where
         p = sampleMean s
         n = fromIntegral $ sampleSize s
     sampleSize (BoolSumm _ t) = t
+    sampleSD  = undefined
+    sampleVar = undefined

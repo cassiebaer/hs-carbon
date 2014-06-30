@@ -9,5 +9,9 @@ class Summary s where
     sampleMean :: s -> Double
     -- | Compute the std. error of the aggregated observations
     sampleSE   :: s -> Double
+    -- | Compute the variance of the aggregated observations
+    sampleVar  :: s -> Double
+    -- | Compute the standard deviation of the aggregated observations
+    sampleSD   :: s -> Double
     -- | Return the number of observations aggregated
     sampleSize :: s -> Int
