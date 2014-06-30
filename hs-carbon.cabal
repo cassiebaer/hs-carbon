@@ -29,6 +29,13 @@ library
   hs-source-dirs:      src
   ghc-options:         -Wall
 
+Test-Suite tests
+  type:               exitcode-stdio-1.0
+  main-is:            Summary.hs
+  hs-source-dirs:     spec
+  build-depends:      base, HUnit, hs-carbon
+  ghc-options:        -Wall
+
 source-repository head
   type:     git
   location: https://github.com/icasperzen/hs-carbon
