@@ -10,11 +10,10 @@ import Data.List (foldl')
 import Control.DeepSeq (NFData(..))
 
 -- | A 'BoolSumm' counts the number of True and all events observed.
-data BoolSumm = BoolSumm
-                 {
-                   _noSuccess :: !Int
-                 , _noTotal   :: !Int
-                 }
+data BoolSumm = BoolSumm {
+                  _noSuccess :: !Int
+                , _noTotal   :: !Int
+                } deriving (Show)
 
 instance NFData BoolSumm
 
@@ -35,3 +34,5 @@ instance Summary BoolSumm where
         p = sampleMean s
         n = fromIntegral $ sampleSize s
     sampleSize (BoolSumm _ t) = t
+    sampleSD  = undefined
+    sampleVar = undefined

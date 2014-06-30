@@ -22,6 +22,7 @@ library
                      , Data.Result
                      , Data.Summary
                      , Data.Summary.Bool
+                     , Data.Summary.Double
   -- other-modules:       
   build-depends:
     base == 4.*, mtl, random, parallel, deepseq
