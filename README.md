@@ -4,7 +4,7 @@ A Haskell framework for (parallel) monte-carlo simulations.
 
 ### What is it?
 
-Carbon is an open-source, Haskell framework aiming to provide easy access to parallel Monte Carlo simulations by providing a simple, but powerful compositional method for building simulations and high-level functions for running them.
+Carbon is an open-source, Haskell framework aiming to provide easy access to parallel Monte Carlo simulations by providing a simple, but powerful compositional method for building simulations, high-level functions for running them, and efficient data structures for aggregating common data types.
 
 Examples of simulations written in Carbon can be found at: https://github.com/icasperzen/hs-carbon-examples
 
@@ -53,22 +53,19 @@ let t = experimentP inUnitCircle noRuns chnkSize gen :: [Bool]
 
 `BoolSumm` is an instance of the `Result` type class/family.
 
+#### Basic Statistics
+
+Carbon provides functionality for computing basic statistics on many types of data.
+The `Summary` typeclass is aimed to capture the most common statistical measures (though, there is no guarantee that all data types will satisfy the full type-class).
+Creating new instances of `Summary` is easy and extra functions can be written to capture even more complex statistical functionality if necessary.
+
 ### Status
 
-_Updated: 2014/06/24_
+_Updated: 2014/06/30_
 
-Version 0.0.1.0 released!
+Version 0.0.1.1 released!
 
 Current features:
-* support for parallelism (using 'Control.Parallel.Strategies.Eval')
+* support for parallelism (using GpH Strategies)
 * high-level function for describing a simulation
-* 2 data aggregation techniques
-
-Features coming soon:
-* more high-level functions
-* more aggregation techniques
-* improved performance
-
-Features for the future:
-* suspend/resume
-* monad transformer or IO wrapper
+* efficient data aggregation techniques
