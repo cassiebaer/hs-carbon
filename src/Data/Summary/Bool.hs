@@ -1,23 +1,29 @@
 {-# LANGUAGE TypeFamilies #-}
 
 module Data.Summary.Bool
-  (BoolSumm, Summary(..))
+  (BoolSumm, Summary(..), boolSumm)
   where
 
 import Data.Result (Result(..))
 import Data.Summary (Summary(..))
+import Data.List (foldl')
+import Control.DeepSeq (NFData(..))
 
 -- | A 'BoolSumm' counts the number of True and all events observed.
-data BoolSumm = BoolSumm
-                 {
-                   _noSuccess :: !Int
-                 , _noTotal   :: !Int
-                 }
+data BoolSumm = BoolSumm {
+                  _noSuccess :: !Int
+                , _noTotal   :: !Int
+                } deriving (Show)
+
+instance NFData BoolSumm
+
+boolSumm :: [Bool] -> BoolSumm
+boolSumm = foldl' addObs rzero
 
 instance Result BoolSumm where
     type Obs BoolSumm = Bool
-    addObs (BoolSumm s t) True = (BoolSumm (s+1) (t+1))
-    addObs (BoolSumm s t) False = (BoolSumm s (t+1))
+    addObs (BoolSumm s t) True = BoolSumm (s+1) (t+1)
+    addObs (BoolSumm s t) False = BoolSumm s (t+1)
     rjoin (BoolSumm s t) (BoolSumm s' t') = BoolSumm (s+s') (t+t')
     rzero = BoolSumm 0 0
 
@@ -28,3 +34,9 @@ instance Summary BoolSumm where
         p = sampleMean s
         n = fromIntegral $ sampleSize s
     sampleSize (BoolSumm _ t) = t
+    sampleSD  = error ("sampleSD" ++ undefBinObs)
+    sampleVar = error ("sampleVar" ++ undefBinObs)
+
+undefBinObs :: String
+undefBinObs =  " is undefined for binary observations. Please contact"
+            ++ " the package maintainer if you can define it."

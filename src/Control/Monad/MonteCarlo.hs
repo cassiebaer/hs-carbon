@@ -92,12 +92,11 @@ experimentP :: (R.RandomGen g, Result s)
             => MonteCarlo g (Obs s) -> Int -> Int -> g -> s
 experimentP m n c g
     | c <= 0    = error "Chunk size must be positive"
-    | n <= c    = experimentS m n g
-    | otherwise = runEval $ do
-                    let !(!g1,!g2) = R.split g
-                    s  <- rpar $ experimentS m c g1
-                    ss <- rpar $ experimentP m (n-c) c g2
-                    return (s `rjoin` ss)
+    | otherwise = let n' = n `div` c
+                      f = experimentS m c
+                      mkGens no seed = (take no $ tail $ map fst $ iterate (\(_,g') -> R.split g') (undefined,seed))
+                      es = (map f (mkGens n' g) `using` parList rseq)
+                   in foldl' rjoin rzero es
 
 -- | 'runMC' is an alias for 'runState'.
 runMC :: R.RandomGen g => MonteCarlo g a -> g -> (a,g)
@@ -114,11 +113,14 @@ mcNext f = do
     let !(!x,!g') = f g
     put g'
     return x
+{-# INLINE mcNext #-}
 
 -- | 'random' calls 'System.Random.random' and updates the internal state
 random :: (R.RandomGen g, R.Random a) => MonteCarlo g a
 random = mcNext R.random
+{-# INLINE random #-}
 
 -- | 'randomR' calls 'System.Random.randomR' and updates the internal state
 randomR :: (R.RandomGen g, R.Random a) => (a,a) -> MonteCarlo g a
-randomR !bounds = mcNext (R.randomR bounds)
+randomR !(!l,!u) = mcNext (R.randomR (l,u))
+{-# INLINE randomR #-}
