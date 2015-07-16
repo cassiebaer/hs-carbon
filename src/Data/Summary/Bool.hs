@@ -15,7 +15,7 @@ data BoolSumm = BoolSumm {
                 , _noTotal   :: !Int
                 } deriving (Show)
 
-instance NFData BoolSumm
+instance NFData BoolSumm where rnf x = seq x ()
 
 boolSumm :: [Bool] -> BoolSumm
 boolSumm = foldl' addObs rzero
