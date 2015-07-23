@@ -7,7 +7,7 @@ description:
   parallel Monte Carlo simulations by providing a simple, but powerful
   compositional method for building simulations and high-level functions for
   running them.
-  Examples can be found at https://github.com/icasperzen/hs-carbon-examples
+  Examples can be found at <https://github.com/icasperzen/hs-carbon-examples>
 license:             MIT
 license-file:        LICENSE
 author:              Casper M. H. Holmgreen
