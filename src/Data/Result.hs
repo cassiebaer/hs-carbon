@@ -9,7 +9,6 @@ module Data.Result
 where
 
 import Control.DeepSeq
-import Data.Monoid
 
 {- $description #description#
 Carbon simulations are built up from 'Control.Monad.MonteCarlo' actions.

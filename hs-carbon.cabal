@@ -1,6 +1,6 @@
 
 name:                hs-carbon
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            A Haskell framework for parallel monte carlo simulations
 description:
   Carbon is an open-source, Haskell framework aiming to provide easy access to

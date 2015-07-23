@@ -15,7 +15,7 @@ data DoubleSumm = DoubleSumm {
                   , _size :: !Int
 } deriving (Show)
 
-instance NFData DoubleSumm
+instance NFData DoubleSumm where rnf x = seq x ()
 
 doubleSumm :: [Double] -> DoubleSumm
 doubleSumm = foldl' addObs rzero
